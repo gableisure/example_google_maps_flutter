@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -7,6 +8,10 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  final Geolocator _geolocator = Geolocator();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  Position _currentPosition;
+
   GoogleMapController mapController;
 
   // Catedral de Brasília
@@ -14,6 +19,38 @@ class _MapPageState extends State<MapPage> {
   double long = -47.8777281;
 
   Set<Marker> markers = new Set<Marker>();
+
+  // Method for retrieving the current location
+  _getCurrentLocation() async {
+    await _geolocator
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+        .then((Position position) async {
+      setState(() {
+        // Store the position in the variable
+        _currentPosition = position;
+
+        print('CURRENT POS: $_currentPosition');
+
+        // For moving the camera to current location
+        mapController.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: LatLng(position.latitude, position.longitude),
+              zoom: 18.0,
+            ),
+          ),
+        );
+      });
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -110,18 +147,31 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: GoogleMap(
-        onMapCreated: _onMapCreated,
-        initialCameraPosition: CameraPosition(
-          target: LatLng(lat, long),
-          zoom: 12.5,
-        ),
-        markers: markers,
-      ),
+    return Container(
+      child: Scaffold(
+          key: _scaffoldKey,
+          body: Stack(
+              children: <Widget>[
+                GoogleMap(
+                  onMapCreated: _onMapCreated,
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(lat, long),
+                    zoom: 12.5,
+                  ),
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: true,
+                  markers: markers,
+                  mapType: MapType.normal,
+                ),
+              ]
+          ),
+      )
     );
+
+
+
+
   }
 }
