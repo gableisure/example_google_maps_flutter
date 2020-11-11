@@ -9,7 +9,8 @@
         android:name="io.flutter.app.FlutterApplication"
         android:label="flutter_balta"
         android:icon="@mipmap/ic_launcher">
-        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyDjr7FrZf23IKqTktFE8gPK-TjgY-2ARC8"/>
+        <meta-data android:name="com.google.android.geo.API_KEY"
+               android:value="YOUR KEY HERE"/>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
